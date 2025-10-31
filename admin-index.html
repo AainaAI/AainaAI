@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aaina AI - Admin Panel</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --admin-blue: #1e40af;
+            --admin-green: #059669;
+            --admin-red: #dc2626;
+            --admin-purple: #7c3aed;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+        }
+        
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1e293b;
+            padding: 1.5rem;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: #0f172a;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: #334155;
+            color: white;
+        }
+        
+        .card {
+            background: #1e293b;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        
+        th {
+            background: #1e293b;
+            font-weight: 600;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: white;
+        }
+        
+        .photo-upload {
+            border: 2px dashed #475569;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .photo-upload:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .photo-upload.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .photo-item {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: #334155;
+            transition: transform 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .photo-info {
+            padding: 0.75rem;
+        }
+        
+        .photo-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: white;
+        }
+        
+        .photo-date {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        .photo-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .preview-item {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-remove {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: rgba(220, 38, 38, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .upload-progress {
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+        
+        .empty-state i {
+            width: 4rem;
+            height: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="sidebar">
+            <div class="logo">
+                <i data-lucide="shield"></i>
+                Aaina AI Admin
+            </div>
+            <nav>
+                <a class="nav-item active" onclick="showSection('dashboard')">
+                    <i data-lucide="layout-dashboard"></i>
+                    Dashboard
+                </a>
+                <a class="nav-item" onclick="showSection('products')">
+                    <i data-lucide="package"></i>
+                    Product Management
+                </a>
+                <a class="nav-item" onclick="showSection('payments')">
+                    <i data-lucide="credit-card"></i>
+                    Payments
+                </a>
+                <a class="nav-item" onclick="showSection('photos')">
+                    <i data-lucide="image"></i>
+                    Before/After Photos
+                </a>
+                <a class="nav-item" onclick="showSection('upi')">
+                    <i data-lucide="qrcode"></i>
+                    UPI Settings
+                </a>
+                <a href="aaina_main.html" class="nav-item">
+                    <i data-lucide="arrow-left"></i>
+                    Back to App
+                </a>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section active">
+                <h1>Admin Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">1,247</div>
+                        <div>Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">₹24,980</div>
+                        <div>Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">89</div>
+                        <div>Premium Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">342</div>
+                        <div>Scans Today</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Recent Activity</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Priya Sharma</td>
+                                <td>Purchased Premium</td>
+                                <td>2 hours ago</td>
+                            </tr>
+                            <tr>
+                                <td>Rahul Kumar</td>
+                                <td>Completed Skin Scan</td>
+                                <td>3 hours ago</td>
+                            </tr>
+                            <tr>
+                                <td>Anjali Patel</td>
+                                <td>Added Product Review</td>
+                                <td>5 hours ago</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Product Management Section -->
+            <div id="products-section" class="section">
+                <h1>Product Management</h1>
+                
+                <div class="card">
+                    <h2>Add New Product</h2>
+                    <form id="product-form">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input type="text" id="product-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="product-category" required>
+                                <option value="">Select Category</option>
+                                <option>Cleanser</option>
+                                <option>Serum</option>
+                                <option>Moisturizer</option>
+                                <option>Sunscreen</option>
+                                <option>Treatment</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price (₹)</label>
+                            <input type="number" id="product-price" required>
+                        </div>
+                        
+                        <!-- New Image Upload Section -->
+                        <div class="form-group">
+                            <label>Product Image</label>
+                            <div class="photo-upload" id="product-image-dropzone">
+                                <i data-lucide="upload" style="width: 2rem; height: 2rem; margin-bottom: 0.5rem;"></i>
+                                <p>Drag & drop product image here or click to browse</p>
+                                <input type="file" id="product-image-input" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-primary" onclick="document.getElementById('product-image-input').click()">Select Image</button>
+                            </div>
+                            <div class="preview-container" id="product-image-preview">
+                                <!-- Product image preview will appear here -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Product Link (Optional)</label>
+                            <input type="url" id="product-link" placeholder="https://example.com/product">
+                        </div>
+                        <div class="form-group">
+                            <label>Description (Optional)</label>
+                            <textarea id="product-description" rows="3" placeholder="Enter product description..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Product</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h2>Current Products</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table">
+                            <!-- Products will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Payments Section -->
+            <div id="payments-section" class="section">
+                <h1>Payment Management</h1>
+                <div class="card">
+                    <h2>Recent Payments</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table">
+                            <!-- Payments will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Before/After Photos Section -->
+            <div id="photos-section" class="section">
+                <h1>Before/After Photos Management</h1>
+                
+                <div class="card">
+                    <h2>Upload New Photos</h2>
+                    <div class="photo-upload" id="photo-dropzone">
+                        <i data-lucide="upload" style="width: 3rem; height: 3rem; margin-bottom: 1rem;"></i>
+                        <p>Drag & drop before/after photos here or click to browse</p>
+                        <input type="file" id="photo-upload-input" multiple accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('photo-upload-input').click()">Select Photos</button>
+                    </div>
+                    
+                    <div class="preview-container" id="photo-preview">
+                        <!-- Preview images will appear here -->
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Photo Description</label>
+                        <textarea id="photo-description" rows="3" placeholder="Enter a description for these photos..."></textarea>
+                    </div>
+                    
+                    <div class="upload-progress" id="upload-progress">
+                        <p>Uploading photos...</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" id="upload-button" onclick="uploadPhotos()" disabled>Upload Photos</button>
+                </div>
+                
+                <div class="card">
+                    <h2>Existing Photos</h2>
+                    <div class="photo-grid" id="photos-grid">
+                        <!-- Photos will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- UPI Settings Section -->
+            <div id="upi-section" class="section">
+                <h1>UPI Payment Settings</h1>
+                
+                <div class="card">
+                    <h2>UPI Configuration</h2>
+                    <div class="form-group">
+                        <label>Your UPI ID</label>
+                        <input type="text" id="upi-id" value="yourname@upi" required>
+                    </div>
+                    <div class="form-group">
+                        <label>QR Code</label>
+                        <div style="background: white; padding: 1rem; border-radius: 0.5rem; display: inline-block;">
+                            <!-- Placeholder for QR code -->
+                            <div style="width: 200px; height: 200px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: black;">
+                                QR Code Image
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary">Generate New QR Code</button>
+                    <button class="btn btn-success" onclick="saveUPISettings()">Save UPI Settings</button>
+                </div>
+                
+                <div class="card">
+                    <h2>Bank Account Details</h2>
+                    <div class="form-group">
+                        <label>Account Holder Name</label>
+                        <input type="text" id="account-name" value="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" id="account-number" value="1234567890" required>
+                    </div>
+                    <div class="form-group">
+                        <label>IFSC Code</label>
+                        <input type="text" id="ifsc-code" value="SBIN0001234" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Bank Name</label>
+                        <input type="text" id="bank-name" value="State Bank of India" required>
+                    </div>
+                    <button class="btn btn-success" onclick="saveBankDetails()">Save Bank Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedFiles = [];
+        let productImageFile = null;
+        
+        // Navigation function
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load data for the section if needed
+            if (sectionName === 'photos') {
+                loadPhotos();
+            } else if (sectionName === 'products') {
+                loadProducts();
+            } else if (sectionName === 'payments') {
+                loadPayments();
+            } else if (sectionName === 'upi') {
+                loadUPISettings();
+                loadBankDetails();
+            }
+        }
+        
+        // UPI Settings Functionality
+        function saveUPISettings() {
+            const upiId = document.getElementById('upi-id').value;
+            const upiSettings = {
+                upiId: upiId,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('aainaUPISettings', JSON.stringify(upiSettings));
+            alert('UPI Settings Saved Successfully!');
+        }
+
+        function loadUPISettings() {
+            const savedSettings = JSON.parse(localStorage.getItem('aainaUPISettings'));
+            if (savedSettings) {
+                document.getElementById('upi-id').value = savedSettings.upiId;
+            }
+        }
+
+        function saveBankDetails() {
+            const bankDetails = {
+                accountName: document.getElementById('account-name').value,
+                accountNumber: document.getElementById('account-number').value,
+                ifscCode: document.getElementById('ifsc-code').value,
+                bankName: document.getElementById('bank-name').value
+            };
+            
+            localStorage.setItem('aainaBankDetails', JSON.stringify(bankDetails));
+            alert('Bank Details Saved Successfully!');
+        }
+
+        function loadBankDetails() {
+            const savedDetails = JSON.parse(localStorage.getItem('aainaBankDetails'));
+            if (savedDetails) {
+                document.getElementById('account-name').value = savedDetails.accountName;
+                document.getElementById('account-number').value = savedDetails.accountNumber;
+                document.getElementById('ifsc-code').value = savedDetails.ifscCode;
+                document.getElementById('bank-name').value = savedDetails.bankName;
+            }
+        }
+        
+        // Fake Payments Data
+        function generateFakePayments() {
+            const payments = [];
+            const statuses = ['Completed', 'Pending', 'Failed'];
+            const users = ['priya@example.com', 'rahul@example.com', 'anjali@example.com', 'sanjay@example.com', 'meera@example.com'];
+            
+            for (let i = 1; i <= 20; i++) {
+                payments.push({
+                    id: `TXN_${String(i).padStart(3, '0')}`,
+                    user: users[Math.floor(Math.random() * users.length)],
+                    amount: Math.floor(Math.random() * 500) + 99,
+                    date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    status: statuses[Math.floor(Math.random() * statuses.length)]
+                });
+            }
+            
+            return payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        function loadPayments() {
+            const payments = generateFakePayments();
+            const tbody = document.getElementById('payments-table');
+            
+            tbody.innerHTML = payments.map(payment => `
+                <tr>
+                    <td>${payment.id}</td>
+                    <td>${payment.user}</td>
+                    <td>₹${payment.amount}</td>
+                    <td>${payment.date}</td>
+                    <td>
+                        <span style="color: ${
+                            payment.status === 'Completed' ? 'var(--admin-green)' : 
+                            payment.status === 'Pending' ? 'var(--admin-purple)' : 
+                            'var(--admin-red)'
+                        };">
+                            ${payment.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Product management functionality
+        document.getElementById('product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const product = {
+                id: Date.now(),
+                name: document.getElementById('product-name').value,
+                category: document.getElementById('product-category').value,
+                price: document.getElementById('product-price').value,
+                link: document.getElementById('product-link').value,
+                description: document.getElementById('product-description').value,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Handle image upload
+            if (productImageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    product.imageDataUrl = e.target.result;
+                    saveProduct(product);
+                };
+                reader.readAsDataURL(productImageFile);
+            } else {
+                saveProduct(product);
+            }
+        });
+
+        function saveProduct(product) {
+            // Save to localStorage
+            let products = JSON.parse(localStorage.getItem('aainaProducts')) || [];
+            products.push(product);
+            localStorage.setItem('aainaProducts', JSON.stringify(products));
+            
+            // Reset form
+            document.getElementById('product-form').reset();
+            productImageFile = null;
+            updateProductImagePreview();
+            
+            // Refresh products table
+            loadProducts();
+            
+            alert('Product added successfully!');
+        }
+        
+        function loadProducts() {
+            const products = JSON.parse(localStorage.getItem('aainaProducts')) || [];
+            const table = document.getElementById('products-table');
+            
+            if (products.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                            <i data-lucide="package" style="width: 3rem; height: 3rem; margin-bottom: 1rem;"></i>
+                            <div>No products added yet</div>
+                        </td>
+                    </tr>
+                `;
+                lucide.createIcons();
+                return;
+            }
+            
+            table.innerHTML = products.map(product => `
+                <tr>
+                    <td>
+                        ${product.imageDataUrl ? 
+                            `<img src="${product.imageDataUrl}" alt="${product.name}" class="product-image-preview">` : 
+                            `<div style="width: 40px; height: 40px; background: #334155; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="package" style="width: 20px; height: 20px;"></i>
+                            </div>`
+                        }
+                    </td>
+                    <td>${product.name}</td>
+                    <td>${product.category}</td>
+                    <td>₹${product.price}</td>
+                    <td>${product.description || 'No description'}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        function deleteProduct(id) {
+            let products = JSON.parse(localStorage.getItem('aainaProducts')) || [];
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('aainaProducts', JSON.stringify(products));
+            loadProducts();
+        }
+
+        // Product Image Upload Functionality
+        function initializeProductImageUpload() {
+            const dropzone = document.getElementById('product-image-dropzone');
+            const fileInput = document.getElementById('product-image-input');
+            
+            dropzone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
+            });
+            
+            dropzone.addEventListener('drop', handleDrop, false);
+            fileInput.addEventListener('change', handleFileSelect, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFileSelect({ target: { files } });
+            }
+            
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    productImageFile = files[0];
+                    updateProductImagePreview();
+                }
+            }
+        }
+
+        function updateProductImagePreview() {
+            const previewContainer = document.getElementById('product-image-preview');
+            
+            if (!productImageFile) {
+                previewContainer.innerHTML = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                previewContainer.innerHTML = `
+                    <div class="preview-item">
+                        <img src="${e.target.result}" alt="Product Preview">
+                        <button class="preview-remove" onclick="removeProductImage()">
+                            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
+            };
+            
+            reader.readAsDataURL(productImageFile);
+        }
+
+        function removeProductImage() {
+            productImageFile = null;
+            document.getElementById('product-image-input').value = '';
+            updateProductImagePreview();
+        }
+        
+        // Photo upload functionality
+        function initializePhotoUpload() {
+            const dropzone = document.getElementById('photo-dropzone');
+            const fileInput = document.getElementById('photo-upload-input');
+            
+            // Click to select files
+            dropzone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropzone.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                dropzone.classList.remove('dragover');
+            }
+            
+            // Handle file selection
+            dropzone.addEventListener('drop', handleDrop, false);
+            fileInput.addEventListener('change', handleFiles, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles({ target: { files } });
+            }
+            
+            function handleFiles(e) {
+                const files = Array.from(e.target.files);
+                selectedFiles = [...selectedFiles, ...files];
+                updatePreview();
+            }
+        }
+        
+        function updatePreview() {
+            const previewContainer = document.getElementById('photo-preview');
+            const uploadButton = document.getElementById('upload-button');
+            
+            previewContainer.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                uploadButton.disabled = true;
+                return;
+            }
+            
+            uploadButton.disabled = false;
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button class="preview-remove" onclick="removePreview(${index})">
+                            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    `;
+                    
+                    previewContainer.appendChild(previewItem);
+                    lucide.createIcons();
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function removePreview(index) {
+            selectedFiles.splice(index, 1);
+            updatePreview();
+        }
+        
+        function uploadPhotos() {
+            const description = document.getElementById('photo-description').value.trim();
+            const progressBar = document.getElementById('progress-fill');
+            const uploadProgress = document.getElementById('upload-progress');
+            
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one photo to upload.');
+                return;
+            }
+            
+            // Show progress bar
+            uploadProgress.style.display = 'block';
+            
+            // Simulate upload progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    // Save photos to localStorage
+                    savePhotos(description);
+                    
+                    // Reset form
+                    selectedFiles = [];
+                    document.getElementById('photo-description').value = '';
+                    document.getElementById('photo-preview').innerHTML = '';
+                    document.getElementById('upload-button').disabled = true;
+                    uploadProgress.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    
+                    // Reload photos grid
+                    loadPhotos();
+                    
+                    alert('Photos uploaded successfully!');
+                }
+            }, 100);
+        }
+        
+        function savePhotos(description) {
+            const photos = JSON.parse(localStorage.getItem('aainaPhotos')) || [];
+            
+            selectedFiles.forEach(file => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const photoData = {
+                        id: Date.now() + Math.random(),
+                        dataUrl: e.target.result,
+                        description: description || 'Before/After Photo',
+                        date: new Date().toLocaleDateString('en-IN'),
+                        fileName: file.name
+                    };
+                    
+                    photos.push(photoData);
+                    localStorage.setItem('aainaPhotos', JSON.stringify(photos));
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function loadPhotos() {
+            const photos = JSON.parse(localStorage.getItem('aainaPhotos')) || [];
+            const photosGrid = document.getElementById('photos-grid');
+            
+            if (photos.length === 0) {
+                photosGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i data-lucide="image" style="color: #94a3b8;"></i>
+                        <h3>No Photos Uploaded Yet</h3>
+                        <p>Upload your first before/after photos to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            photosGrid.innerHTML = photos.map(photo => `
+                <div class="photo-item">
+                    <img src="${photo.dataUrl}" alt="${photo.description}">
+                    <div class="photo-actions">
+                        <button class="action-btn" onclick="deletePhoto('${photo.id}')">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    <div class="photo-info">
+                        <div class="photo-title">${photo.description}</div>
+                        <div class="photo-date">${photo.date}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        function deletePhoto(id) {
+            if (!confirm('Are you sure you want to delete this photo?')) {
+                return;
+            }
+            
+            let photos = JSON.parse(localStorage.getItem('aainaPhotos')) || [];
+            photos = photos.filter(photo => photo.id !== id);
+            localStorage.setItem('aainaPhotos', JSON.stringify(photos));
+            loadPhotos();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            loadProducts();
+            initializePhotoUpload();
+            loadPhotos();
+            initializeProductImageUpload();
+            loadUPISettings();
+            loadBankDetails();
+            loadPayments();
+        });
+    </script>
+</body>
+</html>
