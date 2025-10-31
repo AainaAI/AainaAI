@@ -1,0 +1,382 @@
+--- START OF MODIFIED FILE: aaina_payment.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aaina AI - Payment</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-pink: #ec4899;
+            --brand-purple: #8b5cf6;
+            --success-green: #10b981;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .payment-container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .payment-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.2);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, var(--brand-pink), var(--brand-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .plan-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+        }
+        
+        .plan-features li {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .payment-methods {
+            margin: 2rem 0;
+        }
+        
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .payment-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .payment-option.active {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid var(--brand-purple);
+        }
+        
+        .upi-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: white;
+            margin: 0 auto 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+        }
+        
+        .upi-id {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--brand-pink), var(--brand-purple));
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step.active {
+            background: var(--brand-purple);
+        }
+        
+        .step.completed {
+            background: var(--success-green);
+        }
+        
+        .payment-section {
+            display: none;
+        }
+        
+        .payment-section.active {
+            display: block;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="logo">Aaina AI ✨</div>
+        
+        <div class="payment-card">
+            <!-- Step 1: Plan Selection -->
+            <div id="step1" class="payment-section active">
+                <h2 style="color: white; text-align: center; margin-bottom: 1.5rem;">Choose Your Plan</h2>
+                
+                <div class="plan-card">
+                    <div class="plan-name">Aaina Premium</div>
+                    <div class="plan-price">₹99<span style="font-size: 1rem;">/month</span></div>
+                    
+                    <ul class="plan-features">
+                        <li><i data-lucide="check" style="width: 18px; height: 18px; color: var(--success-green);"></i> Ad-Free Experience</li>
+                        <li><i data-lucide="check" style="width: 18px; height: 18px; color: var(--success-green);"></i> Advanced Skin Analysis</li>
+                        <li><i data-lucide="check" style="width: 18px; height: 18px; color: var(--success-green);"></i> Personalized Routines</li>
+                        <li><i data-lucide="check" style="width: 18px; height: 18px; color: var(--success-green);"></i> Priority Support</li>
+                    </ul>
+                    
+                    <button class="btn btn-primary" onclick="nextStep(2)">Continue to Payment</button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Payment Method -->
+            <div id="step2" class="payment-section">
+                <div class="steps">
+                    <div class="step completed">1</div>
+                    <div class="step active">2</div>
+                    <div class="step">3</div>
+                </div>
+                
+                <h2 style="color: white; text-align: center; margin-bottom: 1.5rem;">Select Payment Method</h2>
+                
+                <div class="payment-methods">
+                    <div class="payment-option active" onclick="selectPaymentMethod('upi')">
+                        <i data-lucide="smartphone" style="width: 24px; height: 24px; color: white;"></i>
+                        <span style="color: white; font-weight: 600;">UPI Payment</span>
+                    </div>
+                    
+                    <div class="payment-option" onclick="selectPaymentMethod('card')">
+                        <i data-lucide="credit-card" style="width: 24px; height: 24px; color: white;"></i>
+                        <span style="color: white; font-weight: 600;">Credit/Debit Card</span>
+                    </div>
+                    
+                    <div class="payment-option" onclick="selectPaymentMethod('netbanking')">
+                        <i data-lucide="landmark" style="width: 24px; height: 24px; color: white;"></i>
+                        <span style="color: white; font-weight: 600;">Net Banking</span>
+                    </div>
+                </div>
+                
+                <!-- UPI Payment Section -->
+                <div id="upi-payment" class="upi-section">
+                    <h3 style="color: white; margin-bottom: 1rem;">Pay via UPI</h3>
+                    <div class="qr-code">
+                        <!-- QR Code would be generated here -->
+                        <div>QR Code</div>
+                    </div>
+                    <div class="upi-id">yourname@upi</div>
+                    <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 1.5rem;">
+                        Scan the QR code with any UPI app to complete payment
+                    </p>
+                    <button class="btn btn-success" onclick="completePayment()">I have made the payment</button>
+                </div>
+                
+                <!-- Card Payment Section -->
+                <div id="card-payment" class="upi-section" style="display: none;">
+                    <h3 style="color: white; margin-bottom: 1rem;">Card Details</h3>
+                    <input type="text" placeholder="Card Number" style="width: 100%; padding: 1rem; border-radius: 0.5rem; border: none; margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" placeholder="MM/YY" style="flex: 1; padding: 1rem; border-radius: 0.5rem; border: none;">
+                        <input type="text" placeholder="CVV" style="flex: 1; padding: 1rem; border-radius: 0.5rem; border: none;">
+                    </div>
+                    <button class="btn btn-success" style="margin-top: 1.5rem;">Pay ₹99</button>
+                </div>
+                
+                <button class="btn" style="background: rgba(255,255,255,0.2); color: white; margin-top: 1rem;" onclick="prevStep(1)">Back</button>
+            </div>
+            
+            <!-- Step 3: Success -->
+            <div id="step3" class="payment-section">
+                <div class="steps">
+                    <div class="step completed">1</div>
+                    <div class="step completed">2</div>
+                    <div class="step completed">3</div>
+                </div>
+                
+                <div class="success-message">
+                    <div class="success-icon">
+                        <i data-lucide="check" style="width: 40px; height: 40px; color: white;"></i>
+                    </div>
+                    <h2 style="color: white; margin-bottom: 1rem;">Payment Successful!</h2>
+                    <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;">
+                        Thank you for subscribing to Aaina Premium. You now have access to all premium features.
+                    </p>
+                    <button class="btn btn-primary" onclick="goToApp()">Start Using Premium Features</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedPaymentMethod = 'upi';
+        
+        function nextStep(step) {
+            document.getElementById('step' + currentStep).classList.remove('active');
+            currentStep = step;
+            document.getElementById('step' + currentStep).classList.add('active');
+        }
+        
+        function prevStep(step) {
+            document.getElementById('step' + currentStep).classList.remove('active');
+            currentStep = step;
+            document.getElementById('step' + currentStep).classList.add('active');
+        }
+        
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Update UI
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Show relevant payment section
+            document.querySelectorAll('.upi-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(method + '-payment').style.display = 'block';
+        }
+        
+        function completePayment() {
+            // Hum yahan payment verify karne ke bajaye, seedhe aage badh rahe hain
+            nextStep(3);
+            
+            // User ka premium status update kar rahe hain localStorage mein
+            let user = JSON.parse(localStorage.getItem('aainaCurrentUser')) || {};
+            user.isPremium = true;
+            localStorage.setItem('aainaCurrentUser', JSON.stringify(user));
+        }
+        
+        function goToApp() {
+            // **CHANGE:** User ko vapas homepage (index.html) par bhej rahe hain
+            window.location.href = 'index.html';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
+--- END OF MODIFIED FILE: aaina_payment.html ---

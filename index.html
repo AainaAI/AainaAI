@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aaina AI - Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --brand-pink: #ec4899; --brand-purple: #8b5cf6; --scan-blue: #0ea5e9; --font-family: 'Inter', sans-serif; }
+        body { margin: 0; font-family: var(--font-family); background-color: #f0f2f5; color: #374151; }
+        * { box-sizing: border-box; }
+        .screen-container { min-height: 100vh; padding-bottom: 150px; /* Space for footer */ }
+        .screen { display: none; min-height: 100vh; padding-top: 80px; }
+        .active-screen { display: block; }
+        .p-8 { padding: 2rem; } .p-6 { padding: 1.5rem; } .max-w-md { max-width: 28rem; } .max-w-lg { max-width: 42rem; } .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; } .font-bold { font-weight: 700; } .text-center { text-align: center; }
+        .flex { display: flex; } .items-center { align-items: center; } .w-full { width: 100%; }
+        .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+        .light-glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.1); }
+        button { border: none; cursor: pointer; font-family: var(--font-family); }
+        button.primary-btn { background-image: linear-gradient(to right, #ec4899, #ef4444); color: white; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
+        button.primary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(239, 68, 68, 0.4); }
+        button:disabled { background: #9ca3af !important; color: #e5e7eb !important; cursor: not-allowed; background-image: none !important; box-shadow: none !important; transform: none !important; }
+        input, select { width: 100%; padding: 1rem; border: 1px solid #d1d5db; border-radius: 0.75rem; font-size: 1rem; outline: none; }
+        input:focus, select:focus { border-color: var(--brand-purple); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+        .app-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 1rem; background: rgba(17, 24, 39, 0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .header-content { max-width: 56rem; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.5rem; color: white; text-decoration: none; }
+        .nav-links { display: flex; align-items: center; gap: 1rem; }
+        .nav-link { color: white; text-decoration: none; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background 0.2s ease; }
+        .nav-link:hover { background: rgba(255,255,255,0.1); }
+        .premium-btn { background: linear-gradient(to right, #facc15, #fb923c); color: #422006; font-weight: 700; }
+        .camera-container { position: relative; overflow: hidden; background: black; }
+        #scan-hologram, #scan-laser { display: none; }
+        .camera-container.scanning-3d #scan-hologram, .camera-container.scanning-3d #scan-laser { display: block; }
+        #scan-hologram { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; background: repeating-linear-gradient(rgba(14, 165, 233, 0.5) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(14, 165, 233, 0.5) 0 1px, transparent 1px 40px); -webkit-mask-image: radial-gradient(ellipse 80% 90% at 50% 50%, black 30%, transparent 100%); mask-image: radial-gradient(ellipse 80% 90% at 50% 50%, black 30%, transparent 100%); animation: hologram-fade 3s ease-out; }
+        #scan-laser { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #ef4444; box-shadow: 0 0 15px 2px #ef4444; animation: laser-scan 3s ease-out; }
+        @keyframes hologram-fade { 0% { opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { opacity: 0; } }
+        @keyframes laser-scan { from { top: 0%; } to { top: 100%; } }
+        #interstitial-ad-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: rgba(0, 0, 0, 0.85); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; }
+        .progress-bar-fg { transform: scaleX(0); transform-origin: left; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .progress-bar-fg.animate { transform: scaleX(1); }
+        
+        /* Missing utility classes */
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .mt-8 { margin-top: 2rem; } .mt-12 { margin-top: 3rem; } .mt-16 { margin-top: 4rem; }
+        .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
+        .mb-3 { margin-bottom: 0.75rem; } .mb-2 { margin-bottom: 0.5rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .px-8 { padding-left: 2rem; padding-right: 2rem; }
+        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-full { border-radius: 9999px; }
+        .grid { display: grid; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-6 { gap: 1.5rem; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .justify-center { justify-content: center; } .justify-between { justify-content: space-between; }
+        .h-full { height: 100%; }
+        .text-red-500 { color: #ef4444; } .text-gray-800 { color: #1f2937; } .text-gray-700 { color: #374151; }
+        
+        /* Animation for loading spinner */
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Secondary button style */
+        .secondary-btn { background: white; border: 1px solid var(--brand-purple); color: var(--brand-purple); padding: 0.875rem; border-radius: 0.75rem; font-weight: 600; transition: all 0.2s; }
+        .secondary-btn:hover { background: rgba(139, 92, 246, 0.1); }
+        
+        /* NEW Footer style */
+        .app-footer { background-color: #1f2937; color: #d1d5db; padding: 3rem 1.5rem; text-align: center; }
+        .footer-content { max-width: 56rem; margin: 0 auto; }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .footer-links a { color: #d1d5db; text-decoration: none; font-weight: 600; transition: color 0.2s; }
+        .footer-links a:hover { color: white; }
+        .social-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .social-links a { color: #d1d5db; transition: color 0.2s; }
+        .social-links a:hover { color: var(--brand-pink); }
+    </style>
+</head>
+<body>
+    <header class="app-header" id="app-header"></header>
+    <div class="screen-container">
+      <div id="dashboard-screen" class="screen active-screen p-6"></div>
+      <div id="onboarding-screen" class="screen p-6"></div>
+      <div id="scan-screen" class="screen p-6"></div>
+      <div id="results-screen" class="screen p-6 pb-24"></div>
+      <div id="routine-screen" class="screen p-6 pb-24"></div>
+      <div id="shop-screen" class="screen p-6 pb-24"></div>
+      <div id="premium-screen" class="screen p-6"></div>
+    </div>
+    <div id="interstitial-ad-overlay"></div>
+    <footer id="app-footer" class="app-footer"></footer>
+    
+    <script>
+        const DEFAULT_IMAGE_URL = 'https://via.placeholder.com/150?text=No+Image';
+        let cameraStream = null;
+        
+        const getEl = (id) => document.getElementById(id);
+        const renderTemplate = (id, html) => { 
+            if(getEl(id)) {
+                getEl(id).innerHTML = html; 
+                if(typeof lucide !== 'undefined') {
+                    setTimeout(() => lucide.createIcons(), 10);
+                }
+            }
+        };
+
+        function navigateTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            const targetScreen = getEl(screenId);
+            if(targetScreen) {
+                targetScreen.classList.add('active-screen');
+                window.scrollTo(0, 0);
+                const renderFunction = window[`render${screenId.charAt(0).toUpperCase() + screenId.slice(1).replace('-screen', '')}Screen`];
+                if (renderFunction) renderFunction();
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+        
+        function renderHeader() {
+            const user = getCurrentUser();
+            let links = `<a href="#" onclick="navigateTo('shop-screen')" class="nav-link">Shop</a>`;
+            if (user) {
+                if (!user.isPremium) links += `<a href="#" onclick="navigateTo('premium-screen')" class="nav-link premium-btn">Go Premium ✨</a>`;
+                links += `<a href="#" class="nav-link">${user.name}</a><a href="#" onclick="handleLogout()" class="nav-link">Logout</a>`;
+            } else {
+                links += `<a href="#" onclick="window.location.href='login.html'" class="nav-link">Login</a>`;
+            }
+            renderTemplate('app-header', `<div class="header-content"><a href="#" onclick="navigateTo('dashboard-screen')" class="logo">Aaina AI</a><nav class="nav-links">${links}</nav></div>`);
+        }
+
+        function renderFooter() {
+            renderTemplate('app-footer', `
+                <div class="footer-content">
+                    <div class="footer-links">
+                        <a href="#">About Us</a>
+                        <a href="#">Contact</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i data-lucide="instagram"></i></a>
+                        <a href="#"><i data-lucide="facebook"></i></a>
+                        <a href="#"><i data-lucide="twitter"></i></a>
+                    </div>
+                    <p>&copy; ${new Date().getFullYear()} Aaina AI. All rights reserved.</p>
+                </div>
+            `);
+        }
+
+        function renderDashboardScreen() {
+            const user = getCurrentUser();
+            renderTemplate('dashboard-screen', `
+                <div class="max-w-4xl mx-auto mt-8 text-center">
+                    <h1 class="font-bold text-4xl text-gray-800">Welcome, ${user ? user.name : 'User'}!</h1>
+                    <p class="text-xl text-gray-700 mt-2 mb-8">AI ki shakti se paayein apni skin ke liye best solutions.</p>
+                    
+                    <div class="light-glass-card p-8 mb-12">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                            <div class="text-left">
+                                <i data-lucide="scan-face" style="width: 4rem; height: 4rem; color: var(--brand-purple); margin-bottom: 1rem;"></i>
+                                <h2 class="font-bold text-3xl text-gray-800">Start Your Skin Analysis</h2>
+                                <p class="text-gray-700 my-4">Sirf ek selfie se apni skin ki zarooratein jaanein aur paayein ek personalized skincare routine.</p>
+                                <button onclick="navigateTo('onboarding-screen')" class="primary-btn py-4 px-8 rounded-xl font-bold text-lg">Abhi Scan Karein</button>
+                            </div>
+                            <div class="flex justify-center">
+                                <img src="https://via.placeholder.com/300x300?text=AI+Skin+Analysis" alt="AI Skin Analysis" class="rounded-2xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <section class="mt-16">
+                        <h2 class="font-bold text-3xl text-gray-800 mb-8">Kaise Kaam Karta Hai?</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="light-glass-card p-6">
+                                <i data-lucide="camera" class="mx-auto mb-4" style="width: 3rem; height: 3rem; color: var(--brand-pink);"></i>
+                                <h3 class="font-bold text-xl mb-2">1. Scan Karein</h3>
+                                <p>Apne chehre ka ek 3D scan lein.</p>
+                            </div>
+                            <div class="light-glass-card p-6">
+                                <i data-lucide="brain-circuit" class="mx-auto mb-4" style="width: 3rem; height: 3rem; color: var(--brand-pink);"></i>
+                                <h3 class="font-bold text-xl mb-2">2. Analyze Karein</h3>
+                                <p>Hamara AI aapki skin ko analyze karta hai.</p>
+                            </div>
+                            <div class="light-glass-card p-6">
+                                <i data-lucide="sparkles" class="mx-auto mb-4" style="width: 3rem; height: 3rem; color: var(--brand-pink);"></i>
+                                <h3 class="font-bold text-xl mb-2">3. Routine Paayein</h3>
+                                <p>Aapke liye ek custom routine taiyaar.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="mt-16">
+                        <h2 class="font-bold text-3xl text-gray-800 mb-8">Hamare Users Ka Kehna Hai</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="light-glass-card p-6 text-left">
+                                <div class="flex items-center mb-4">
+                                    <img src="https://i.pravatar.cc/50?u=a" alt="Priya S." class="rounded-full mr-4">
+                                    <div>
+                                        <p class="font-bold text-gray-800">Priya S.</p>
+                                        <p class="text-sm text-gray-700">Mumbai</p>
+                                    </div>
+                                </div>
+                                <p>"Aaina AI ne meri skin ko samajhne mein bahut help ki. Ab mera confidence badh gaya hai!"</p>
+                            </div>
+                            <div class="light-glass-card p-6 text-left">
+                               <div class="flex items-center mb-4">
+                                    <img src="https://i.pravatar.cc/50?u=b" alt="Rahul K." class="rounded-full mr-4">
+                                    <div>
+                                        <p class="font-bold text-gray-800">Rahul K.</p>
+                                        <p class="text-sm text-gray-700">Delhi</p>
+                                    </div>
+                                </div>
+                                <p>"Products dhoondhna itna aasan kabhi nahi tha. Recommended routine sach mein kaam karta hai."</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>`);
+        }
+        
+        function renderOnboardingScreen() {
+             renderTemplate('onboarding-screen', `
+                <div class="max-w-md mx-auto mt-8">
+                    <div class="light-glass-card p-8">
+                        <h2 style="font-size: 1.875rem;" class="font-bold text-gray-800 mb-8 text-center">Aapke Baare Mein</h2>
+                        <div class="space-y-6">
+                            <div><label class="block font-bold text-gray-700 mb-2">Umra (Age)</label><input id="age-input" type="number" placeholder="25" /></div>
+                            <div><label class="block font-bold text-gray-700 mb-2">Skin Type</label><select id="skin-type-select"><option value="">Select karein</option><option>Oily</option><option>Dry</option><option>Combination</option><option>Normal</option><option>Sensitive</option></select></div>
+                            <div><label class="block font-bold text-gray-700 mb-2">Mukhya Chinta</label><select id="concern-select"><option value="">Select karein</option><option>Pimples</option><option>Dark Spots</option><option>Wrinkles</option><option>Dullness</option></select></div>
+                        </div>
+                        <button id="onboarding-proceed-btn" onclick="navigateTo('scan-screen')" disabled class="w-full mt-8 py-4 rounded-xl font-bold text-lg transition-all primary-btn">Aage Badhein</button>
+                    </div>
+                </div>`);
+            ['age-input', 'skin-type-select', 'concern-select'].forEach(id => {
+                const element = getEl(id);
+                if (element) {
+                    element.addEventListener('input', checkOnboardingCompletion);
+                }
+            });
+            checkOnboardingCompletion();
+        }
+
+        function renderScanScreen() {
+            renderTemplate('scan-screen', `
+                <div class="max-w-md mx-auto mt-8">
+                    <div class="light-glass-card p-6">
+                        <h2 style="font-size: 1.875rem;" class="font-bold text-gray-800 mb-6 text-center">3D Face Scan</h2>
+                        <div id="scan-initial-view">
+                            <div class="camera-container rounded-2xl" id="camera-container" style="height: 300px;">
+                                <video id="camera-view" autoplay playsinline style="display: none; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); border-radius: 1rem;"></video>
+                                <div id="camera-placeholder" class="flex items-center justify-center h-full"><i data-lucide="camera" style="width: 8rem; height: 8rem; color: #9ca3af;"></i></div>
+                                <div id="scan-hologram"></div>
+                                <div id="scan-laser"></div>
+                            </div>
+                            <p id="camera-error" class="text-center text-red-500 my-4" style="display: none;"></p>
+                            <button id="start-camera-btn" class="w-full primary-btn py-4 rounded-xl font-bold text-lg">Start Camera</button>
+                            <button id="take-picture-btn" style="display: none;" class="w-full primary-btn py-4 rounded-xl font-bold text-lg">Start 3D Scan</button>
+                        </div>
+                        <div id="scan-loading-view" style="display: none;" class="text-center py-16">
+                            <div style="animation: spin 1s linear infinite; width: 4rem; height: 4rem; border: 6px solid var(--brand-pink); border-top-color: transparent; border-radius: 9999px; margin: 0 auto 1.5rem;"></div>
+                            <p class="font-bold text-xl" style="color: #1f2937;">AI Aapki Skin Analyze Kar Raha Hai...</p>
+                        </div>
+                    </div>
+                </div>`);
+            getEl('start-camera-btn').addEventListener('click', startCamera);
+            getEl('take-picture-btn').addEventListener('click', takePictureAndAnalyze);
+        }
+
+        function renderResultsScreen() {
+             renderTemplate('results-screen', `
+                <div class="max-w-md mx-auto mt-8">
+                    <div class="light-glass-card p-8 mb-6">
+                        <h2 style="font-size: 1.875rem;" class="font-bold text-gray-800 mb-6 text-center">Skin Health Report</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between items-center mb-3"><span class="font-bold text-lg" style="color:#1f2937;">Hydration</span><span class="font-bold text-2xl" style="color:#22c55e;">85/100</span></div>
+                                <div class="progress-bar-bg" style="width:100%; background-color:#e5e7eb; border-radius:9999px; height:1rem;"><div id="hydration-bar" class="progress-bar-fg green" style="width: 85%; height: 1rem; border-radius: 9999px; background: linear-gradient(to right, #4ade80, #22c55e); box-shadow: 0 0 10px #22c55e;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-3"><span class="font-bold text-lg" style="color:#1f2937;">Dark Spots</span><span class="font-bold text-2xl" style="color:#eab308;">60/100</span></div>
+                                <div class="progress-bar-bg" style="width:100%; background-color:#e5e7eb; border-radius:9999px; height:1rem;"><div id="spots-bar" class="progress-bar-fg yellow" style="width: 60%; height: 1rem; border-radius: 9999px; background: linear-gradient(to right, #facc15, #eab308); box-shadow: 0 0 10px #eab308;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <button onclick="navigateTo('routine-screen')" class="primary-btn py-4 rounded-xl font-bold text-lg">Routine Dekhein</button>
+                        <button onclick="navigateTo('shop-screen')" class="secondary-btn">All Products</button>
+                    </div>
+                </div>`);
+             setTimeout(() => {
+                 const hydrationBar = getEl('hydration-bar');
+                 const spotsBar = getEl('spots-bar');
+                 if (hydrationBar) hydrationBar.classList.add('animate');
+                 if (spotsBar) spotsBar.classList.add('animate');
+             }, 100);
+        }
+        
+        function renderRoutineScreen() {
+            const products = getProducts();
+            const routineMap = { 'Cleanser': 'both', 'Serum': 'morning', 'Moisturizer': 'morning', 'Sunscreen': 'morning', 'Treatment': 'night' };
+            
+            const createProductHTML = (product) => {
+                return `
+                    <div class="light-glass-card" style="padding: 1rem; display: flex; gap: 1rem; align-items: center;">
+                        <img src="${product.imageUrl || DEFAULT_IMAGE_URL}" alt="${product.name}" onerror="this.src='${DEFAULT_IMAGE_URL}'" style="width: 4rem; height: 4rem; object-fit: contain; border-radius: 0.5rem; background: #fff; border: 1px solid #e5e7eb;">
+                        <div style="flex: 1;">
+                            <h3 style="font-weight: 600; font-size: 1rem; margin: 0 0 0.25rem 0; color: #1f2937;">${product.name}</h3>
+                            <p style="font-weight: 700; font-size: 1rem; color: #16a34a; margin: 0;">Rs ${product.price}</p>
+                        </div>
+                        <a href="${product.link}" target="_blank" rel="noopener" class="primary-btn font-bold flex items-center justify-center gap-2" style="text-decoration:none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size:0.875rem;">
+                            <i data-lucide="shopping-bag"></i> Buy
+                        </a>
+                    </div>
+                `;
+            };
+            
+            renderTemplate('routine-screen', `
+                <div class="max-w-md mx-auto mt-8">
+                    <h2 style="font-size: 1.875rem;" class="font-bold text-gray-800 mb-6 text-center">Your Skincare Routine</h2>
+                    
+                    <div class="light-glass-card p-6 mb-6">
+                        <h3 class="font-bold text-xl mb-4" style="color: #1f2937;">Morning Routine</h3>
+                        <div class="space-y-4">
+                            ${products.filter(p => routineMap[p.category] === 'morning' || routineMap[p.category] === 'both').map(p => createProductHTML(p)).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="light-glass-card p-6">
+                        <h3 class="font-bold text-xl mb-4" style="color: #1f2937;">Night Routine</h3>
+                        <div class="space-y-4">
+                            ${products.filter(p => routineMap[p.category] === 'night' || routineMap[p.category] === 'both').map(p => createProductHTML(p)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        function renderShopScreen() {
+            const products = getProducts();
+            const productCardsHTML = products.length > 0 ? products.map(p => `
+                <div class="light-glass-card" style="padding: 1rem; text-align: left;">
+                    <img src="${p.imageUrl || DEFAULT_IMAGE_URL}" alt="${p.name}" onerror="this.src='${DEFAULT_IMAGE_URL}'" style="width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:0.5rem; background:#fff; margin-bottom:1rem; border:1px solid #e5e7eb;">
+                    <span style="font-size: 0.75rem; font-weight: 600; color: var(--brand-purple); background-color: rgba(233, 213, 255, 0.7); padding: 0.25rem 0.75rem; border-radius: 999px;">${p.category}</span>
+                    <h3 style="font-weight: 600; font-size: 1.1rem; margin: 0.75rem 0 0.5rem 0; color: #1f2937;">${p.name}</h3>
+                    <p style="font-weight: 700; font-size: 1.5rem; color: #16a34a; margin: 0 0 1rem 0;">Rs ${p.price}</p>
+                    <a href="${p.link}" target="_blank" rel="noopener" class="w-full primary-btn font-bold flex items-center justify-center gap-2" style="text-decoration:none; padding: 0.75rem; border-radius: 0.5rem; font-size:1rem;">
+                        <i data-lucide="shopping-bag"></i> Kharidein
+                    </a>
+                </div>`).join('') : '<p class="text-center" style="color:#1f2937;">Products jald hi add kiye jayenge!</p>';
+            
+            renderTemplate('shop-screen', `
+                <div class="max-w-lg mx-auto mt-8">
+                    <h2 style="font-size: 1.875rem;" class="font-bold text-gray-800 mb-6 text-center">Explore Our Products</h2>
+                    <div class="shop-grid">${productCardsHTML}</div>
+                </div>`);
+        }
+        
+        function renderPremiumScreen() {
+             renderTemplate('premium-screen', `
+                <div class="max-w-md mx-auto mt-8 text-center">
+                    <div class="light-glass-card p-8">
+                         <h2 class="font-bold text-3xl" style="color: #1f2937;">Unlock Aaina Premium ✨</h2>
+                         <p style="color:#4b5563; margin:1rem 0 2.5rem 0; font-size:1.1rem;">Apne skincare journey ko next level par le jaayein.</p>
+                         <div style="text-align:left; display:flex; flex-direction:column; gap:1.5rem; margin-bottom: 2.5rem;">
+                            <div class="flex items-center gap-3"><i data-lucide="zap" style="color:var(--brand-purple);"></i><span style="font-weight:600;">Ad-Free Experience</span></div>
+                            <div class="flex items-center gap-3"><i data-lucide="bar-chart-2" style="color:var(--brand-purple);"></i><span style="font-weight:600;">Skin Journey Tracker (Coming Soon)</span></div>
+                         </div>
+                         <button onclick="handleSubscription()" class="primary-btn py-4 px-8 rounded-xl font-bold text-lg">Subscribe Now (₹99/month)</button>
+                    </div>
+                </div>`);
+        }
+
+        // --- CORE LOGIC ---
+        function checkOnboardingCompletion() {
+            const canProceed = ['age-input', 'skin-type-select', 'concern-select'].every(id => {
+                const element = getEl(id);
+                return element && element.value.trim() !== '';
+            });
+            const proceedBtn = getEl('onboarding-proceed-btn');
+            if(proceedBtn) proceedBtn.disabled = !canProceed;
+        }
+        
+        async function startCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                const cameraView = getEl('camera-view');
+                const cameraPlaceholder = getEl('camera-placeholder');
+                const startCameraBtn = getEl('start-camera-btn');
+                const takePictureBtn = getEl('take-picture-btn');
+                
+                if (cameraView) {
+                    cameraView.srcObject = cameraStream;
+                    cameraView.style.display = 'block';
+                }
+                if (cameraPlaceholder) cameraPlaceholder.style.display = 'none';
+                if (startCameraBtn) startCameraBtn.style.display = 'none';
+                if (takePictureBtn) takePictureBtn.style.display = 'block';
+            } catch (error) { 
+                const errEl = getEl('camera-error');
+                if(errEl) { 
+                    errEl.textContent = "Camera start nahi ho paya. Permission check karein."; 
+                    errEl.style.display = 'block'; 
+                }
+            }
+        }
+
+        function takePictureAndAnalyze() {
+            const cameraContainer = getEl('camera-container');
+            const takePictureBtn = getEl('take-picture-btn');
+            const scanInitialView = getEl('scan-initial-view');
+            const scanLoadingView = getEl('scan-loading-view');
+            
+            if (cameraContainer) cameraContainer.classList.add('scanning-3d');
+            if (takePictureBtn) takePictureBtn.style.display = 'none';
+            
+            setTimeout(() => {
+                stopCamera();
+                if (scanInitialView) scanInitialView.style.display = 'none';
+                if (scanLoadingView) scanLoadingView.style.display = 'block';
+                
+                setTimeout(() => {
+                    const user = getCurrentUser();
+                    if(user && user.isPremium) {
+                        navigateTo('results-screen');
+                    } else {
+                        showInterstitialAd(() => navigateTo('results-screen'));
+                    }
+                }, 1500);
+            }, 3000);
+        }
+        
+        function stopCamera() {
+            const container = getEl('camera-container');
+            if (container) container.classList.remove('scanning-3d');
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            const videoView = getEl('camera-view');
+            if (videoView) videoView.style.display = 'none';
+        }
+        
+        function getProducts() { 
+            try { 
+                const products = JSON.parse(localStorage.getItem('aainaProducts'));
+                if (Array.isArray(products) && products.length > 0) {
+                    return products;
+                }
+            } catch(e) { 
+                console.error("Error loading products:", e);
+            }
+            
+            // Return default products if none exist
+            return [
+                { id: 1, name: "Gentle Cleanser", category: "Cleanser", price: 499, imageUrl: "https://via.placeholder.com/150?text=Cleanser", link: "#" },
+                { id: 2, name: "Hydrating Serum", category: "Serum", price: 899, imageUrl: "https://via.placeholder.com/150?text=Serum", link: "#" },
+                { id: 3, name: "Moisturizing Cream", category: "Moisturizer", price: 699, imageUrl: "https://via.placeholder.com/150?text=Moisturizer", link: "#" },
+                { id: 4, name: "SPF 50 Sunscreen", category: "Sunscreen", price: 599, imageUrl: "https://via.placeholder.com/150?text=Sunscreen", link: "#" },
+                { id: 5, name: "Night Treatment", category: "Treatment", price: 1299, imageUrl: "https://via.placeholder.com/150?text=Treatment", link: "#" }
+            ];
+        }
+        
+        function showInterstitialAd(onAdClosedCallback) {
+            const overlay = getEl('interstitial-ad-overlay');
+            if (overlay) {
+                renderTemplate('interstitial-ad-overlay', `
+                    <div id="interstitial-ad-content" class="light-glass-card p-8">
+                        <h3 class="font-bold text-gray-800 text-xl mb-2">Advertisement</h3>
+                        <img src="https://via.placeholder.com/350x200?text=Your+Amazing+Ad+Here" alt="Ad" style="width: 100%; border-radius: 0.5rem;">
+                        <p id="interstitial-countdown" style="color:#4b5563;" class="mt-2"></p>
+                        <button id="interstitial-ad-close-btn" class="primary-btn w-full" style="margin-top:1rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: bold;" disabled>Close Ad</button>
+                    </div>`);
+                overlay.style.display = 'flex';
+                
+                let countdown = 5;
+                const closeBtn = getEl('interstitial-ad-close-btn');
+                const countdownEl = getEl('interstitial-countdown');
+                
+                const interval = setInterval(() => {
+                    if (countdown > 0) {
+                        if(countdownEl) countdownEl.textContent = `Aap is ad ko ${countdown} second mein band kar sakte hain.`;
+                        countdown--;
+                    } else {
+                        clearInterval(interval);
+                        if(countdownEl) countdownEl.textContent = 'Aap ab ad band kar sakte hain.';
+                        if(closeBtn) { 
+                            closeBtn.disabled = false; 
+                            closeBtn.textContent = 'Ad Band Karein'; 
+                        }
+                    }
+                }, 1000);
+
+                if(closeBtn) closeBtn.addEventListener('click', () => {
+                    overlay.style.display = 'none';
+                    if (typeof onAdClosedCallback === 'function') onAdClosedCallback();
+                }, { once: true });
+            }
+        }
+        
+        // --- AUTH LOGIC ---
+        function getCurrentUser() { 
+            try {
+                const user = JSON.parse(localStorage.getItem('aainaCurrentUser'));
+                if (user) return user;
+            } catch(e) {
+                console.error("Error loading user:", e);
+            }
+            
+            const defaultUser = { name: "Demo User", email: "demo@example.com", isPremium: false };
+            localStorage.setItem('aainaCurrentUser', JSON.stringify(defaultUser));
+            return defaultUser;
+        }
+        
+        function handleLogout() { 
+            localStorage.removeItem('aainaCurrentUser'); 
+            window.location.href = 'login.html'; 
+        }
+        
+        function handleSubscription() {
+            window.location.href = 'aaina_payment.html';
+        }
+
+        // --- APP INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            getCurrentUser();
+            renderHeader();
+            renderFooter(); // Render the new footer
+            navigateTo('dashboard-screen');
+        });
+    </script>
+</body>
+</html>
